@@ -8,9 +8,7 @@ header('Content-Type: application/json');
 $response = ['success' => false, 'message' => '', 'data' => []];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $type = $_POST['type'];
-
-    if ($type == 'connection') {
+    if (isset($_POST['confirmpassword']) == 1) {
         handleLogin();
     } else {
         handleRegistration();
@@ -23,7 +21,7 @@ function handleLogin() {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $sql_check_login = "SELECT * FROM users WHERE email = ?";
+    $sql_check_login = "SELECT * FROM utilisateur WHERE mail = ?";
     $stmt_check_login = mysqli_prepare($conn, $sql_check_login);
     mysqli_stmt_bind_param($stmt_check_login, "s", $email);
     mysqli_stmt_execute($stmt_check_login);
@@ -33,19 +31,19 @@ function handleLogin() {
         $row = mysqli_fetch_assoc($result_check_login);
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
-            echo $_SESSION;
+            echo $_SESSION['user_id'];
             exit();
         } else {
-            $error_message = "Mot de passe incorrect.";
+            $err = "Mot de passe incorrect.";
         }
     } else {
-        $error_message = "Adresse email incorrecte.";
+        $err = "Adresse email incorrecte.";
     }
 
     mysqli_close($conn);
 
     $query = http_build_query([
-        'error_message' => $error_message,
+        'err' => $err,
         'email' => $email
     ]);
     header("Location: ../public/pages/index.php?" . $query);
@@ -107,7 +105,7 @@ function handleRegistration() {
     mysqli_close($conn);
 
     $res_query = http_build_query([
-        'error_message' => $response['message'],
+        'err' => $response['message'],
         'nom' => $response['data']['nom'],
         'prenoms' => $response['data']['prenoms'],
         'email' => $response['data']['email'],
