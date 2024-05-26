@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require_once 'db.php';
 
 header('Content-Type: application/json');
@@ -6,74 +8,111 @@ header('Content-Type: application/json');
 $response = ['success' => false, 'message' => '', 'data' => []];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $identity = "";
-    $identity .= $_POST['nom'] ? $_POST['nom'] : "";
-    $identity .= $_POST['prenoms'] ?
-        (
-            $identity == "" ?
-            $_POST['prenoms'] :
-            " " . $_POST['prenoms']
-        ) :
-        "";
+    $type = $_POST['type'];
+
+    if ($type == 'login') {
+        handleLogin();
+    } else {
+        handleRegistration();
+    }
+}
+
+function handleLogin() {
+    global $conn;
+
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    $sql_check_login = "SELECT * FROM users WHERE email = ?";
+    $stmt_check_login = mysqli_prepare($conn, $sql_check_login);
+    mysqli_stmt_bind_param($stmt_check_login, "s", $email);
+    mysqli_stmt_execute($stmt_check_login);
+    $result_check_login = mysqli_stmt_get_result($stmt_check_login);
+
+    if (mysqli_num_rows($result_check_login) == 1) {
+        $row = mysqli_fetch_assoc($result_check_login);
+        if (password_verify($password, $row['password'])) {
+            $_SESSION['user_id'] = $row['id'];
+            echo $_SESSION;
+            exit();
+        } else {
+            $error_message = "Mot de passe incorrect.";
+        }
+    } else {
+        $error_message = "Adresse email incorrecte.";
+    }
+
+    mysqli_close($conn);
+
+    $query = http_build_query([
+        'error_message' => $error_message,
+        'email' => $email
+    ]);
+    header("Location: ../public/pages/index.php?" . $query);
+    exit();
+}
+
+
+function handleRegistration() {
+    global $conn, $response;
+
+    $identity = $_POST['nom'] . ' ' . $_POST['prenoms'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirmpassword'];
 
-    $response['data'] = [
-        'nom' => $_POST['nom'],
-        'prenoms' => $_POST['prenoms'],
-        'email' => $email,
-    ];
+    $sql_check_email = "SELECT * FROM utilisateur WHERE mail = ?";
+    $stmt_check_email = mysqli_prepare($conn, $sql_check_email);
+    mysqli_stmt_bind_param($stmt_check_email, "s", $email);
+    mysqli_stmt_execute($stmt_check_email);
+    $result_check_email = mysqli_stmt_get_result($stmt_check_email);
 
-    define($passwordRegex, "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{6,}$/");
-
-    // Vérifiez que tous les champs sont remplis
-    if (empty($email) || empty($password)) {
-        $response['message'] = "Tous les champs doivent être remplis.";
-    } else if (!preg_match($passwordRegex, $password)) {
-        $response['message'] = "Le mot de passe doit contenir au moins 8 caractères, incluant une majuscule, une minuscule et un chiffre.";
-    } else if ($password !== $confirm_password) {
-        $response['message'] = "Les mots de passe ne correspondent pas.";
-    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $response['message'] = "Veuillez entrer une adresse email valide.";
+    if (mysqli_num_rows($result_check_email) > 0) {
+        $response['message'] = "Cet email est déjà utilisé.";
     } else {
-        // Hasher le mot de passe
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+        $response['data'] = [
+            'nom' => $_POST['nom'],
+            'prenoms' => $_POST['prenoms'],
+            'email' => $email,
+        ];
 
-        // Générer la date d'inscription
-        $created_at = date("Y-m-d H:i:s");
+        $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{4,}$/";
 
-        // Préparer la requête SQL
-        $id = "";
-        $sql = "INSERT INTO utilisateur (id, identity, mail, password, auth, created_at) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssss", $id, $identity, $email, $hashed_password, $date);
-
-        // Exécuter la requête
-        if (mysqli_stmt_execute($stmt)) {
-            echo "Inscription réussie !";
-            exit();
+        if (empty($email) || empty($password)) {
+            $response['message'] = "Tous les champs doivent être remplis.";
+        } else if (!preg_match($passwordRegex, $password)) {
+            $response['message'] = "Le mot de passe doit contenir au moins 6 caractères, incluant une majuscule, une minuscule et un chiffre.";
+        } else if ($password !== $confirm_password) {
+            $response['message'] = "Les mots de passe ne correspondent pas.";
+        } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response['message'] = "Veuillez entrer une adresse email valide.";
         } else {
-            $response['message'] = "Une erreur est survenue.\nInformation : " . mysqli_error($conn);
-        }
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+            $created_at = date("Y-m-d H:i:s");
+            $sql = "INSERT INTO utilisateur (identity, mail, password, created_at) VALUES (?, ?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, "ssss", $identity, $email, $hashed_password, $created_at);
 
-        // Fermer la déclaration et la connexion
-        mysqli_stmt_close($stmt);
+            if (mysqli_stmt_execute($stmt)) {
+                header("Location: ../public/pages/success.php");
+                exit();
+            } else {
+                $response['message'] = "Une erreur est survenue.\nInformation : " . mysqli_error($conn);
+            }
+
+            mysqli_stmt_close($stmt);
+        }
     }
 
-    // Fermer la connexion à la base de données
     mysqli_close($conn);
 
-    // Url de redirection
     $res_query = http_build_query([
         'error_message' => $response['message'],
         'nom' => $response['data']['nom'],
         'prenoms' => $response['data']['prenoms'],
         'email' => $response['data']['email'],
-        'password' => $password,
     ]);
 
-    // Renvoyer la reponse
-    header("Location: ../pages/index.php?" . $res_query);
+    header("Location: ../public/pages/index.php?" . $res_query);
     exit();
 }

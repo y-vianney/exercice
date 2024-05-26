@@ -5,7 +5,7 @@ Application web destinée à des apprenants / étudiants; Site de formations
 
 # Interfaces
 1- Administrateur
-- Charger les cours sous forme de diapos, vidéo ..
+- Charger les cours sous forme de diapos, vidéo..
 - Gérer les utilisateurs (création, modification, suppression)
 - Gérer les QCM
 
