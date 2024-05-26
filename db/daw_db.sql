@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: May 26, 2024 at 09:28 PM
+-- Generation Time: May 26, 2024 at 10:00 PM
 -- Server version: 5.7.39
 -- PHP Version: 8.2.0
 
@@ -20,6 +20,19 @@ SET time_zone = "+00:00";
 --
 -- Database: `daw_db`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `apprenant`
+--
+
+CREATE TABLE `apprenant` (
+  `id` int(11) NOT NULL,
+  `level` int(11) DEFAULT '1',
+  `average` double DEFAULT '0',
+  `learner` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -47,6 +60,7 @@ CREATE TABLE `qcm` (
   `title` varchar(50) NOT NULL,
   `content` text NOT NULL,
   `tutor` int(11) NOT NULL,
+  `maximum` int(11) NOT NULL DEFAULT '0',
   `created_at` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -60,7 +74,9 @@ CREATE TABLE `response` (
   `id` int(11) NOT NULL,
   `content` text NOT NULL,
   `qcm` int(11) NOT NULL,
-  `sub_date` date NOT NULL
+  `note` double NOT NULL,
+  `sub_date` date NOT NULL,
+  `learner` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -90,6 +106,13 @@ INSERT INTO `utilisateur` (`id`, `identity`, `mail`, `password`, `auth`, `create
 --
 
 --
+-- Indexes for table `apprenant`
+--
+ALTER TABLE `apprenant`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `learner_id` (`learner`);
+
+--
 -- Indexes for table `course`
 --
 ALTER TABLE `course`
@@ -111,7 +134,8 @@ ALTER TABLE `qcm`
 --
 ALTER TABLE `response`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `qcm_id` (`qcm`);
+  ADD KEY `qcm_id` (`qcm`),
+  ADD KEY `learner_id` (`learner`);
 
 --
 -- Indexes for table `utilisateur`
@@ -123,6 +147,12 @@ ALTER TABLE `utilisateur`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `apprenant`
+--
+ALTER TABLE `apprenant`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course`
@@ -147,6 +177,35 @@ ALTER TABLE `response`
 --
 ALTER TABLE `utilisateur`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `apprenant`
+--
+ALTER TABLE `apprenant`
+  ADD CONSTRAINT `relation_learner_user` FOREIGN KEY (`learner`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Constraints for table `course`
+--
+ALTER TABLE `course`
+  ADD CONSTRAINT `relation_course_user` FOREIGN KEY (`tutor`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Constraints for table `qcm`
+--
+ALTER TABLE `qcm`
+  ADD CONSTRAINT `relation_qcm_user` FOREIGN KEY (`tutor`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Constraints for table `response`
+--
+ALTER TABLE `response`
+  ADD CONSTRAINT `relation_learner_resp` FOREIGN KEY (`learner`) REFERENCES `apprenant` (`id`),
+  ADD CONSTRAINT `relation_qcm_resp` FOREIGN KEY (`qcm`) REFERENCES `qcm` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
