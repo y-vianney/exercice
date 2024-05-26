@@ -46,7 +46,7 @@ function handleLogin() {
         'err' => $err,
         'email' => $email
     ]);
-    header("Location: ../public/pages/index.php?" . $query);
+    header("Location: ../public/pages/home.php?" . $query);
     exit();
 }
 
