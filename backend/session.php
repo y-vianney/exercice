@@ -10,7 +10,7 @@ $response = ['success' => false, 'message' => '', 'data' => []];
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $type = $_POST['type'];
 
-    if ($type == 'login') {
+    if ($type == 'connection') {
         handleLogin();
     } else {
         handleRegistration();
