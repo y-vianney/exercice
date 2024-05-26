@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 $response = ['success' => false, 'message' => '', 'data' => []];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_POST['confirmpassword']) == 1) {
+    if (isset($_POST['login'])) {
         handleLogin();
     } else {
         handleRegistration();
@@ -31,7 +31,7 @@ function handleLogin() {
         $row = mysqli_fetch_assoc($result_check_login);
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
-            echo $_SESSION['user_id'];
+            header("Location: ../public/pages/home.php");
             exit();
         } else {
             $err = "Mot de passe incorrect.";
@@ -46,7 +46,7 @@ function handleLogin() {
         'err' => $err,
         'email' => $email
     ]);
-    header("Location: ../public/pages/home.php?" . $query);
+    header("Location: ../public/pages/index.php?" . $query);
     exit();
 }
 
