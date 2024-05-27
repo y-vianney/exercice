@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 function handleLogin() {
     global $conn;
 
-    $email = $_POST['email'];
+    $email = $_POST['login'];
     $password = $_POST['password'];
 
     $sql_check_login = "SELECT * FROM utilisateur WHERE mail = ?";
