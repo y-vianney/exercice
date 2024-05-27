@@ -8,12 +8,6 @@ const btn = [
 btn.forEach(
   (el) =>
     (el.onclick = () => {
-      const loginInputs = loginBox.querySelectorAll("input");
-      loginInputs.forEach(input => input.value = "");
-
-      const signupInputs = signupBox.querySelectorAll("input");
-      signupInputs.forEach(input => input.value = "");
-
       loginBox.classList.toggle("active");
       signupBox.classList.toggle("active");
     })

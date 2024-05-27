@@ -44,6 +44,7 @@ function handleLogin() {
 
     $query = http_build_query([
         'err' => $err,
+        'login' => true,
         'email' => $email
     ]);
     header("Location: ../public/pages/index.php?" . $query);
@@ -79,7 +80,7 @@ function handleRegistration() {
         if (empty($email) || empty($password)) {
             $response['message'] = "Tous les champs doivent être remplis.";
         } else if (!preg_match($passwordRegex, $password)) {
-            $response['message'] = "Le mot de passe doit contenir au moins 6 caractères, incluant une majuscule, une minuscule et un chiffre.";
+            $response['message'] = "Le mot de passe doit contenir au moins 4 caractères, incluant une majuscule, une minuscule et un chiffre.";
         } else if ($password !== $confirm_password) {
             $response['message'] = "Les mots de passe ne correspondent pas.";
         } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -87,6 +88,8 @@ function handleRegistration() {
         } else {
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
             $created_at = date("Y-m-d H:i:s");
+
+            // Default role is learner "apprenant"
             $sql = "INSERT INTO utilisateur (identity, mail, password, created_at) VALUES (?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $sql);
             mysqli_stmt_bind_param($stmt, "ssss", $identity, $email, $hashed_password, $created_at);

@@ -16,7 +16,7 @@
     </style>
     <script>
         setTimeout(() => {
-            window.location.href = 'index.php';
+            window.location.href = 'index.php?login=true';
         }, 5000);
     </script>
 </head>

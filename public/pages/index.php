@@ -12,7 +12,7 @@
 	<div class="wrapper">
 		<div class="inner">
 			<img src="../../assets/images/image-1.png" alt="" class="image-1">
-			<form action="../../backend/session.php" method="post" class="form active" id="signup">
+			<form action="../../backend/session.php" method="post" class="form <?php echo isset($_GET['login']) ? '' : 'active' ?>" id="signup">
 				<span class="button" id="btn-1">Se connecter</span>
 				<span class="title">
 					Inscription <span class="not-selectable" style="color: #999;">Compte apprenant</span>
@@ -43,7 +43,7 @@
 					<span>Enregistrer</span>
 				</button>
 			</form>
-			<form action="../../backend/session.php" method="post" class="form" id="login">
+			<form action="../../backend/session.php" method="post" class="form <?php echo isset($_GET['login']) ? 'active' : '' ?>" id="login">
 				<span class="button" id="btn-2">S'inscrire</span>
 				<span class="title">
 					Connexion <span class="not-selectable" style="color: #999;">Compte apprenant</span>
