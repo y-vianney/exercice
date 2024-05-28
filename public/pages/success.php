@@ -17,12 +17,12 @@
     <script>
         setTimeout(() => {
             window.location.href = 'index.php?login=true';
-        }, 5000);
+        }, 3000);
     </script>
 </head>
 <body>
     <div class="message">
-        Inscription réussie. Vous serez redirigé vers la page de connexion dans 5 secondes.
+        Inscription réussie. Vous serez redirigé vers la page de connexion dans 3 secondes.
     </div>
 </body>
 </html>

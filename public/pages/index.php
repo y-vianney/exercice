@@ -8,6 +8,22 @@
 	<?php include '../partials/link.php' ?>
 </head>
 
+<?php
+	session_start();
+
+	// Vérifier si l'utilisateur est connecté
+	if (isset($_SESSION['user_id'])) {
+		header('Location: home.php');
+		exit();
+	}
+
+	$err = '';
+	if (isset($_COOKIE['err'])) {
+		$err = $_COOKIE['err'];
+		setcookie('err', '', time() - 3600, '/'); // Supprimer le cookie après l'affichage
+	}
+?>
+
 <body>
 	<div class="wrapper">
 		<div class="inner">
@@ -35,11 +51,11 @@
 
 				<div id="responseMessage" style="color: #dc3545; text-align: center;">
 					<small>
-						<?= $_GET['err'] ?? '' ?>
+						<?= $err ?>
 					</small>
 				</div>
 
-				<button type="submit">
+				<button type="submit" class="session-btn">
 					<span>Enregistrer</span>
 				</button>
 			</form>
@@ -57,19 +73,17 @@
 
 				<div id="responseMessage" style="color: #dc3545; text-align: center;">
 					<small>
-						<?= $_GET['error_message'] ?? '' ?>
+						<?= $err ?>
 					</small>
 				</div>
 
-				<button type="submit">
+				<button type="submit" class="session-btn">
 					<span>Se connecter</span>
 				</button>
 			</form>
 			<img src="../../assets/images/image-2.png" alt="" class="image-2">
 		</f>
 	</div>
-
-	<?= $_GET['password'] ?? '' ?>
 </body>
 
 <script src="../../assets/js/script.js"></script>

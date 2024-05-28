@@ -3,8 +3,6 @@ session_start();
 
 require_once 'db.php';
 
-header('Content-Type: application/json');
-
 $response = ['success' => false, 'message' => '', 'data' => []];
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -15,7 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-function handleLogin() {
+function handleLogin()
+{
     global $conn;
 
     $email = $_POST['login'];
@@ -31,6 +30,8 @@ function handleLogin() {
         $row = mysqli_fetch_assoc($result_check_login);
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['id'];
+            $_SESSION['name'] = $row['identity'];
+            $_SESSION['mail'] = $row['mail'];
             header("Location: ../public/pages/home.php");
             exit();
         } else {
@@ -52,7 +53,8 @@ function handleLogin() {
 }
 
 
-function handleRegistration() {
+function handleRegistration()
+{
     global $conn, $response;
 
     $identity = $_POST['nom'] . ' ' . $_POST['prenoms'];
@@ -107,8 +109,10 @@ function handleRegistration() {
 
     mysqli_close($conn);
 
+    // Créer un cookie pour le message d'erreur
+    setcookie('err', $response['message'], time() + 5, '/');
+
     $res_query = http_build_query([
-        'err' => $response['message'],
         'nom' => $response['data']['nom'],
         'prenoms' => $response['data']['prenoms'],
         'email' => $response['data']['email'],
